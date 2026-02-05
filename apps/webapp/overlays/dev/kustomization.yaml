@@ -1,0 +1,45 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - ../../base
+
+# Namespace específico do ambiente
+namespace: webapp-dev
+
+# Prefixo para diferenciar recursos (opcional)
+namePrefix: dev-
+
+# Labels específicas do ambiente
+commonLabels:
+  environment: dev
+  tier: development
+
+# Patches JSON6902 para modificar recursos
+patches:
+  # Patch 1: Alterar replicas
+  - target:
+      kind: Deployment
+      name: webapp
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+  
+  # Patch 2: Habilitar debug logs
+  - target:
+      kind: ConfigMap
+      name: webapp-config
+    patch: |-
+      - op: replace
+        path: /data/LOG_LEVEL
+        value: debug
+      - op: add
+        path: /data/DEBUG_MODE
+        value: "true"
+
+# Imagens podem ter tags diferentes por ambiente
+images:
+  - name: nginxdemos/hello
+    newTag: latest
