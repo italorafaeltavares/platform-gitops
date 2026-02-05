@@ -42,4 +42,4 @@ patches:
 # Imagens podem ter tags diferentes por ambiente
 images:
   - name: nginxdemos/hello
-    newTag: latest
+    newTag: 0.4
