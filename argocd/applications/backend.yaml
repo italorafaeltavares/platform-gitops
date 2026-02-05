@@ -11,7 +11,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/SEU-USUARIO/platform-gitops.git
+    repoURL: https://github.com/italorafaeltavares/platform-gitops.git
     targetRevision: main
     path: apps/backend
   destination:
