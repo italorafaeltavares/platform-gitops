@@ -1,24 +1,22 @@
-replicaCount: 2
+replicaCount: 3  # Aumentado de 2
 
 image:
   tag: "1.27-alpine"
 
 resources:
   requests:
-    cpu: 50m
-    memory: 64Mi
+    cpu: 75m       # Aumentado de 50m
+    memory: 96Mi   # Aumentado de 64Mi
   limits:
-    cpu: 100m
-    memory: 128Mi
-
-namespace: nginx-web
+    cpu: 150m      # Aumentado de 100m
+    memory: 192Mi  # Aumentado de 128Mi
 
 serverBlock: |
   server {
     listen 80;
     server_name _;
     location / {
-      return 200 'Hello from NGINX via ArgoCD Helm!';
+      return 200 'Hello from NGINX via ArgoCD Helm! (Updated)';
       add_header Content-Type text/plain;
     }
     location /health {
