@@ -1,0 +1,79 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - ../../base
+  - hpa.yaml
+
+namespace: webapp-prod
+
+namePrefix: prod-
+
+commonLabels:
+  environment: production
+  tier: production
+
+patches:
+  # Alta disponibilidade (3 replicas iniciais)
+  - target:
+      kind: Deployment
+      name: webapp
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+  
+  # Recursos generosos
+  - target:
+      kind: Deployment
+      name: webapp
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 200m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 256Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 500m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 512Mi
+  
+  # Log level error (menos verboso)
+  - target:
+      kind: ConfigMap
+      name: webapp-config
+    patch: |-
+      - op: replace
+        path: /data/LOG_LEVEL
+        value: error
+      - op: replace
+        path: /data/FEATURES_ENABLED
+        value: "full"
+  
+  # Tolerâncias e affinity (produção) - opcional
+  - target:
+      kind: Deployment
+      name: webapp
+    patch: |-
+      - op: add
+        path: /spec/template/spec/affinity
+        value:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - webapp
+                topologyKey: kubernetes.io/hostname
+
+images:
+  - name: nginxdemos/hello
+    newTag: latest
